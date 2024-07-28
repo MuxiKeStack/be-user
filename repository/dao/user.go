@@ -63,6 +63,14 @@ func (dao *GORMUserDAO) Insert(ctx context.Context, u User) error {
 	return err
 }
 
+func (dao *GORMUserDAO) DB() *gorm.DB {
+	return dao.db
+}
+
+func (dao *GORMUserDAO) SetDB(db *gorm.DB) {
+	dao.db = db
+}
+
 func NewGORMUserDAO(db *gorm.DB) UserDAO {
 	return &GORMUserDAO{db: db}
 }

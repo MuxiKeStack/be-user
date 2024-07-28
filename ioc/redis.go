@@ -5,7 +5,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitRedis() redis.Cmdable {
+func InitRedisCmd(client *redis.Client) redis.Cmdable {
+	return client
+}
+
+func InitRedisClient() *redis.Client {
 	type Config struct {
 		Addr     string `yaml:"addr"`
 		Password string `yaml:"password"`

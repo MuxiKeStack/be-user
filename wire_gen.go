@@ -10,9 +10,7 @@ import (
 	"github.com/MuxiKeStack/be-user/grpc"
 	"github.com/MuxiKeStack/be-user/ioc"
 	"github.com/MuxiKeStack/be-user/pkg/grpcx"
-	"github.com/MuxiKeStack/be-user/repository"
 	"github.com/MuxiKeStack/be-user/repository/cache"
-	"github.com/MuxiKeStack/be-user/repository/dao"
 	"github.com/MuxiKeStack/be-user/service"
 )
 
@@ -21,13 +19,14 @@ import (
 func InitGRPCServer() grpcx.Server {
 	logger := ioc.InitLogger()
 	db := ioc.InitDB(logger)
-	userDAO := dao.NewGORMUserDAO(db)
-	cmdable := ioc.InitRedis()
+	client := ioc.InitRedisClient()
+	cmdable := ioc.InitRedisCmd(client)
 	userCache := cache.NewRedisUserCache(cmdable)
-	userRepository := repository.NewCachedUserRepository(userDAO, userCache, logger)
+	redsync := ioc.InitRedSync(client)
+	userRepository := ioc.InitUserRepository(db, userCache, logger, redsync)
 	userService := service.NewUserService(userRepository)
 	userServiceServer := grpc.NewUserServiceServer(userService)
-	client := ioc.InitEtcdClient()
-	server := ioc.InitGRPCxKratosServer(userServiceServer, client, logger)
+	clientv3Client := ioc.InitEtcdClient()
+	server := ioc.InitGRPCxKratosServer(userServiceServer, clientv3Client, logger)
 	return server
 }
